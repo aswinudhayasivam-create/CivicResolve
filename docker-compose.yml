@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: civicresolve-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grievance_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - civicresolve_pgdata:/var/lib/postgresql/data
+volumes:
+  civicresolve_pgdata:

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(civic_duplicate LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+add_library(civic_duplicate SHARED src/duplicate_detector.cpp)
+target_include_directories(civic_duplicate PUBLIC include)
