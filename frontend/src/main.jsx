@@ -654,18 +654,27 @@ function Submit({ user, go }) {
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   React.useEffect(() => {
+    let active = true;
     fetch(API + '/categories')
       .then((response) => {
         if (!response.ok) throw new Error('Categories could not be loaded.');
         return response.json();
       })
       .then((items) => {
+        if (!Array.isArray(items) || !items.every((item) => item && Number.isInteger(item.id) && item.id > 0 && typeof item.name === 'string')) {
+          throw new Error('Categories returned an invalid response.');
+        }
+        if (!active) return;
         setCategories(items);
         if (items.length) setForm((current) => ({ ...current, category: String(items[0].id) }));
+        else setMsg('No grievance categories are available yet. Please try again shortly.');
       })
-      .catch((error) => setMsg(error.message));
+      .catch((error) => active && setMsg(error.message))
+      .finally(() => active && setCategoriesLoading(false));
+    return () => { active = false; };
   }, []);
 
 
@@ -675,6 +684,12 @@ function Submit({ user, go }) {
 
     if (!user) {
       go('login');
+      return;
+    }
+
+    const categoryId = Number(form.category);
+    if (!Number.isInteger(categoryId) || !categories.some((category) => category.id === categoryId)) {
+      setMsg('Choose one of the available categories before submitting.');
       return;
     }
 
@@ -702,7 +717,7 @@ function Submit({ user, go }) {
             priority: form.priority,
             location: form.location,
 
-            categoryId: Number(form.category)
+            categoryId
           })
         }
       );
@@ -837,7 +852,7 @@ function Submit({ user, go }) {
           <select
             className="input"
             required
-            disabled={!categories.length}
+            disabled={categoriesLoading || !categories.length}
             value={form.category}
             onChange={(e) =>
               setForm({
@@ -846,7 +861,7 @@ function Submit({ user, go }) {
               })
             }
           >
-            {!categories.length && <option value="">Loading categories…</option>}
+            {!categories.length && <option value="">{categoriesLoading ? 'Loading categories…' : 'No categories available'}</option>}
             {categories.map((category) => (
               <option
                 key={category.id}

@@ -36,7 +36,7 @@ public class ComplaintController {
     @PostMapping @ResponseStatus(HttpStatus.CREATED)
     public Complaint create(@Valid @RequestBody ComplaintRequest request, Authentication authentication) {
         var citizen = currentCitizen(authentication);
-        var category = categories.findById(request.categoryId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected category does not exist"));
+        var category = categories.findById(request.categoryId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Selected category does not exist"));
         var now = LocalDateTime.now(); var complaint = new Complaint();
         complaint.title = request.title().trim(); complaint.description = request.description().trim();
         complaint.location = request.location() == null ? null : request.location().trim();

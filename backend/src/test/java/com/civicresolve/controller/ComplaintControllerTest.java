@@ -25,13 +25,13 @@ class ComplaintControllerTest {
  @Mock CategoryRepository categories;
  @Mock ComplaintHistoryRepository history;
 
- @Test void complaintWithMissingCategoryReturnsAClientErrorInsteadOfNoSuchElement() {
+ @Test void complaintWithMissingCategoryReturnsNotFoundInsteadOfNoSuchElement() {
   User citizen = new User(); citizen.email = "citizen@example.com"; citizen.active = true;
   when(users.findByEmailIgnoreCase("citizen@example.com")).thenReturn(Optional.of(citizen));
   when(categories.findById(999L)).thenReturn(Optional.empty());
   ComplaintController controller = new ComplaintController(complaints, users, categories, history);
   var authentication = new UsernamePasswordAuthenticationToken("citizen@example.com", null);
   assertThatThrownBy(() -> controller.create(new ComplaintRequest("Title", "Description", 999L, "MEDIUM", "Location"), authentication))
-   .isInstanceOf(ResponseStatusException.class).extracting(e -> ((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+   .isInstanceOf(ResponseStatusException.class).extracting(e -> ((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
  }
 }
