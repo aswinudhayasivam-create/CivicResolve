@@ -7,5 +7,7 @@ import jakarta.persistence.*;
  @Column(unique=true,nullable=false) public String email;
  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) @Column(name="password_hash") public String passwordHash;
  public String phone; public String role="CITIZEN";
+ @Column(name="language", nullable=false) public String language="en";
+ @Column(name="notifications_enabled", nullable=false) public boolean notificationsEnabled=true;
  @Column(name="is_active") public boolean active=true;
 }

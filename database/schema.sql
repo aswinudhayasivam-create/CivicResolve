@@ -36,6 +36,9 @@ CREATE INDEX IF NOT EXISTS idx_status ON complaints(status);
 CREATE INDEX IF NOT EXISTS idx_category ON complaints(category_id);
 CREATE INDEX IF NOT EXISTS idx_created ON complaints(created_at);
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(5) NOT NULL DEFAULT 'en';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+
 INSERT INTO categories(name,description) VALUES
 ('Roads','Potholes, damaged roads and signage'),
 ('Street Lights','Broken public lighting'),

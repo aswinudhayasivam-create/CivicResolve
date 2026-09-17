@@ -44,7 +44,7 @@ public class AuthController {
   if (authentication == null || authentication.getName() == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
   User user = users.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user no longer exists"));
   if (!user.active) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account is inactive");
-  return new UserResponse(user.id, user.fullName, user.email, user.role);
+  return new UserResponse(user.id, user.fullName, user.email, user.role, user.phone, user.language, user.notificationsEnabled);
  }
 
  private ResponseStatusException invalidCredentials() { return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"); }
