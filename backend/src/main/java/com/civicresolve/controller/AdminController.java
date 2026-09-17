@@ -5,7 +5,7 @@ import com.civicresolve.model.*; import com.civicresolve.repository.*; import or
  public AdminController(ComplaintRepository r,ComplaintHistoryRepository h){repo=r;history=h;}
  @GetMapping("/complaints") public List<Complaint> all(){return repo.findAll();}
  @PatchMapping("/complaints/{id}/status") public Complaint status(@PathVariable Long id,@RequestBody Map<String,String> b){
-  var c=repo.findById(id).orElseThrow();String old=c.status;c.status=b.get("status");c.updatedAt=LocalDateTime.now();
+  var c=repo.findById(id).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Complaint not found"));String old=c.status;String next=b.get("status");if(!List.of("SUBMITTED","UNDER_REVIEW","IN_PROGRESS","RESOLVED").contains(next))throw new IllegalArgumentException("Invalid complaint status");c.status=next;c.updatedAt=LocalDateTime.now();
   if("RESOLVED".equals(c.status))c.resolvedAt=LocalDateTime.now();var s=repo.save(c);
   var h=new ComplaintHistory();h.complaint=s;h.oldStatus=old;h.newStatus=s.status;h.comment=b.getOrDefault("comment","Status updated");history.save(h);return s;
  }

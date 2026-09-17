@@ -671,30 +671,27 @@ function Submit({ user, go }) {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    category: '1',
+    category: '',
     priority: 'MEDIUM',
     location: ''
   });
 
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-
-  /*
-    These IDs match the categories currently
-    seeded in PostgreSQL.
-  */
-
-  const categories = [
-    { id: 1, name: 'Roads' },
-    { id: 2, name: 'Street Lights' },
-    { id: 3, name: 'Garbage' },
-    { id: 4, name: 'Water Supply' },
-    { id: 5, name: 'Electricity' },
-    { id: 6, name: 'Drainage' },
-    { id: 7, name: 'Public Health' },
-    { id: 8, name: 'Public Transport' }
-  ];
+  React.useEffect(() => {
+    fetch(API + '/categories')
+      .then((response) => {
+        if (!response.ok) throw new Error('Categories could not be loaded.');
+        return response.json();
+      })
+      .then((items) => {
+        setCategories(items);
+        if (items.length) setForm((current) => ({ ...current, category: String(items[0].id) }));
+      })
+      .catch((error) => setMsg(error.message));
+  }, []);
 
 
   const send = async (e) => {
@@ -730,13 +727,7 @@ function Submit({ user, go }) {
             priority: form.priority,
             location: form.location,
 
-            citizen: {
-              id: user.userId
-            },
-
-            category: {
-              id: Number(form.category)
-            }
+            categoryId: Number(form.category)
           })
         }
       );
@@ -795,7 +786,7 @@ function Submit({ user, go }) {
       setForm({
         title: '',
         description: '',
-        category: '1',
+        category: categories[0] ? String(categories[0].id) : '',
         priority: 'MEDIUM',
         location: ''
       });
@@ -870,6 +861,8 @@ function Submit({ user, go }) {
 
           <select
             className="input"
+            required
+            disabled={!categories.length}
             value={form.category}
             onChange={(e) =>
               setForm({
@@ -878,7 +871,7 @@ function Submit({ user, go }) {
               })
             }
           >
-
+            {!categories.length && <option value="">Loading categories…</option>}
             {categories.map((category) => (
               <option
                 key={category.id}

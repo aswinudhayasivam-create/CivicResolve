@@ -57,6 +57,11 @@ public class SecurityConfig {
                 s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint((request, response, exception) -> response.sendError(401, "Authentication required"))
+                .accessDeniedHandler((request, response, exception) -> response.sendError(403, "Access denied"))
+            )
+
             .authorizeHttpRequests(a ->
                 a.requestMatchers(
                     "/api/auth/**",
