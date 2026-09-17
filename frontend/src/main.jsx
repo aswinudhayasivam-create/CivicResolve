@@ -71,12 +71,21 @@ function Button({
 ========================================================= */
 
 function Nav({ go, user, onLogout }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = (page) => {
+    setMobileOpen(false);
+    go(page);
+  };
+  const logout = () => {
+    setMobileOpen(false);
+    onLogout();
+  };
   return (
     <nav className="sticky top-0 z-40 p-4">
       <div className="glass max-w-7xl mx-auto rounded-2xl px-5 py-3 flex items-center justify-between">
 
         <button
-          onClick={() => go('home')}
+          onClick={() => navigate('home')}
           className="font-black text-xl flex gap-2 items-center"
         >
           <ShieldCheck className="text-white" />
@@ -86,14 +95,14 @@ function Nav({ go, user, onLogout }) {
         <div className="hidden md:flex items-center gap-2 text-sm">
 
           <button
-            onClick={() => go('home')}
+            onClick={() => navigate('home')}
             className="px-3 py-2"
           >
             Home
           </button>
 
           <button
-            onClick={() => go('track')}
+            onClick={() => navigate('track')}
             className="px-3 py-2"
           >
             Track
@@ -101,7 +110,7 @@ function Nav({ go, user, onLogout }) {
 
           {user?.role !== 'ADMIN' && user?.role !== 'AUTHORITY' && (
             <button
-              onClick={() => go('submit')}
+              onClick={() => navigate('submit')}
               className="px-3 py-2"
             >
               Submit
@@ -110,7 +119,7 @@ function Nav({ go, user, onLogout }) {
 
           {(user?.role === 'ADMIN' || user?.role === 'AUTHORITY') && (
             <button
-              onClick={() => go('admin')}
+              onClick={() => navigate('admin')}
               className="px-3 py-2"
             >
               Authority
@@ -119,24 +128,40 @@ function Nav({ go, user, onLogout }) {
 
           {user ? (
             <button
-              onClick={onLogout}
+              onClick={logout}
               className="glass px-4 py-2 rounded-xl"
             >
               Logout
             </button>
           ) : (
-            <Button onClick={() => go('login')}>
+            <Button onClick={() => navigate('login')}>
               Login
             </Button>
           )}
 
         </div>
 
-        <button className="md:hidden">
-          <Menu />
+        <button
+          type="button"
+          className="md:hidden rounded-xl p-2 glass"
+          aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((open) => !open)}
+        >
+          {mobileOpen ? <X /> : <Menu />}
         </button>
 
       </div>
+
+      {mobileOpen && (
+        <div className="glass max-w-7xl mx-auto mt-2 rounded-2xl p-2 md:hidden grid gap-1">
+          <button type="button" onClick={() => navigate('home')} className="text-left rounded-xl px-4 py-3">Home</button>
+          <button type="button" onClick={() => navigate('track')} className="text-left rounded-xl px-4 py-3">Track complaint</button>
+          {user?.role !== 'ADMIN' && user?.role !== 'AUTHORITY' && <button type="button" onClick={() => navigate('submit')} className="text-left rounded-xl px-4 py-3">Submit grievance</button>}
+          {(user?.role === 'ADMIN' || user?.role === 'AUTHORITY') && <button type="button" onClick={() => navigate('admin')} className="text-left rounded-xl px-4 py-3">Authority console</button>}
+          {user ? <button type="button" onClick={logout} className="text-left rounded-xl px-4 py-3">Logout</button> : <button type="button" onClick={() => navigate('login')} className="text-left rounded-xl px-4 py-3">Login</button>}
+        </div>
+      )}
     </nav>
   );
 }
