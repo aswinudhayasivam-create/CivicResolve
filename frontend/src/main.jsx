@@ -143,7 +143,7 @@ function Nav({ go, user, onLogout }) {
             Track
           </button>
 
-          {user?.role !== 'ADMIN' && (
+          {user?.role !== 'ADMIN' && user?.role !== 'AUTHORITY' && (
             <button
               onClick={() => go('submit')}
               className="px-3 py-2"
@@ -152,7 +152,7 @@ function Nav({ go, user, onLogout }) {
             </button>
           )}
 
-          {user?.role === 'ADMIN' && (
+          {(user?.role === 'ADMIN' || user?.role === 'AUTHORITY') && (
             <button
               onClick={() => go('admin')}
               className="px-3 py-2"
@@ -330,12 +330,12 @@ function Auth({ mode, go, setUser }) {
         mode === 'login'
           ? {
               email: form.email,
-              passwordHash: form.password
+              password: form.password
             }
           : {
               fullName: form.name,
               email: form.email,
-              passwordHash: form.password
+              password: form.password
             };
 
       const response = await fetch(
@@ -383,7 +383,7 @@ function Auth({ mode, go, setUser }) {
         });
 
         go(
-          data.role === 'ADMIN'
+          data.role === 'ADMIN' || data.role === 'AUTHORITY'
             ? 'admin'
             : 'citizen'
         );
@@ -391,16 +391,16 @@ function Auth({ mode, go, setUser }) {
       } else {
 
         setMsg(
-          'Account created. Please sign in.'
+          'Account created. You can now sign in.'
         );
-
-        go('login');
       }
 
     } catch (error) {
 
       setMsg(
-        error.message ||
+        error instanceof TypeError
+          ? 'Unable to reach CivicResolve. Check your connection and try again.'
+          : error.message ||
         'Something went wrong.'
       );
 
@@ -529,7 +529,8 @@ function Track() {
       );
 
       if (!response.ok) {
-        throw new Error();
+        const error = await response.json().catch(() => null);
+        throw new Error(error?.message || 'No complaint found.');
       }
 
       const data = await response.json();
@@ -537,35 +538,9 @@ function Track() {
       setData(data);
       setMsg('');
 
-    } catch {
-
-      const complaint =
-        demoComplaints.find(
-          (x) => x.trackingNumber === code
-        );
-
-      if (complaint) {
-
-        setData({
-          complaint,
-          history: [
-            {
-              newStatus: 'SUBMITTED',
-              comment: 'Complaint received'
-            },
-            {
-              newStatus: complaint.status,
-              comment: 'Latest update'
-            }
-          ]
-        });
-
-      } else {
-
-        setData(null);
-        setMsg('No complaint found.');
-
-      }
+    } catch (error) {
+      setData(null);
+      setMsg(error.message || 'No complaint found.');
     }
   };
 
@@ -959,6 +934,33 @@ function Submit({ user, go }) {
 
 function Citizen({ user, go }) {
 
+  const [complaints, setComplaints] = useState([]);
+  const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await fetch(API + '/complaints/mine', {
+          headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(data?.message || 'Could not load your complaints.');
+        setComplaints(data);
+      } catch (error) {
+        setMsg(error.message || 'Could not load your complaints.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const counts = complaints.reduce((result, complaint) => {
+    result[complaint.status] = (result[complaint.status] || 0) + 1;
+    return result;
+  }, {});
+
   return (
     <section className="max-w-7xl mx-auto px-5 pt-12">
 
@@ -986,9 +988,9 @@ function Citizen({ user, go }) {
       <div className="grid md:grid-cols-3 gap-4 mt-8">
 
         {[
-          ['4', 'Submitted'],
-          ['2', 'In progress'],
-          ['8', 'Resolved']
+          [counts.SUBMITTED || 0, 'Submitted'],
+          [counts.IN_PROGRESS || 0, 'In progress'],
+          [counts.RESOLVED || 0, 'Resolved']
         ].map((x) => (
           <div
             key={x[1]}
@@ -1017,7 +1019,7 @@ function Citizen({ user, go }) {
 
         <div className="mt-4 space-y-3">
 
-          {demoComplaints.map((c) => (
+          {complaints.map((c) => (
             <div
               key={c.id}
               className="rounded-2xl bg-white/5 p-4 flex flex-wrap justify-between gap-3"
@@ -1040,11 +1042,15 @@ function Citizen({ user, go }) {
               </div>
 
               <span className="h-fit rounded-full bg-white/10 px-3 py-1 text-sm">
-                {c.status}
+                <StatusPill status={c.status} />
               </span>
 
             </div>
           ))}
+
+          {loading && <div className="text-neutral-500 py-4">Loading your complaints…</div>}
+          {!loading && !complaints.length && !msg && <div className="text-neutral-500 py-4">No complaints submitted yet.</div>}
+          {msg && <div className="text-neutral-300 py-4">{msg}</div>}
 
         </div>
 
@@ -1839,6 +1845,19 @@ function App() {
 
   const [user, setUser] =
     useState(null);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch(API + '/auth/me', { headers: { Authorization: 'Bearer ' + token } })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data) throw new Error('Saved session is no longer valid.');
+        setUser({ name: data.name, role: data.role, userId: data.userId });
+        setPage(data.role === 'ADMIN' || data.role === 'AUTHORITY' ? 'admin' : 'citizen');
+      })
+      .catch(() => localStorage.removeItem('token'));
+  }, []);
 
 
   const go = (pageName) => {

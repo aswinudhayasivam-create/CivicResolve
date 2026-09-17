@@ -49,6 +49,8 @@ public class ComplaintController {
     }
     private com.civicresolve.model.User currentCitizen(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
-        return users.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user no longer exists"));
+        var user = users.findByEmailIgnoreCase(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user no longer exists"));
+        if (!user.active) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account is inactive");
+        return user;
     }
 }

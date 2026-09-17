@@ -5,8 +5,8 @@ import jakarta.servlet.*; import jakarta.servlet.http.*; import org.springframew
  protected void doFilterInternal(HttpServletRequest req,HttpServletResponse res,FilterChain chain)throws ServletException,IOException{
   String h=req.getHeader("Authorization");
   if(h!=null&&h.startsWith("Bearer ")){try{var c=jwt.parse(h.substring(7));String email=c.getSubject();String role=c.get("role",String.class);
-   var a=new UsernamePasswordAuthenticationToken(email,null,List.of(new SimpleGrantedAuthority("ROLE_"+role)));
-   SecurityContextHolder.getContext().setAuthentication(a);
+   if(email!=null&&!email.isBlank()&&List.of("CITIZEN","ADMIN","AUTHORITY").contains(role)){var a=new UsernamePasswordAuthenticationToken(email,null,List.of(new SimpleGrantedAuthority("ROLE_"+role)));
+   SecurityContextHolder.getContext().setAuthentication(a);}
   }catch(Exception ignored){}}
   chain.doFilter(req,res);
  }

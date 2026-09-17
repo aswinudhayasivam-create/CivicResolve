@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.*;
@@ -64,10 +65,17 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(a ->
                 a.requestMatchers(
-                    "/api/auth/**",
                     "/api/categories",
                     "/api/complaints/track/**"
                 ).permitAll()
+
+                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/api/auth/me", "/api/complaints/mine")
+                .hasRole("CITIZEN")
+
+                .requestMatchers(HttpMethod.POST, "/api/complaints")
+                .hasRole("CITIZEN")
 
                 .requestMatchers("/api/admin/**")
                 .hasAnyRole("ADMIN", "AUTHORITY")
