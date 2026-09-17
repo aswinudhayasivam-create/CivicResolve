@@ -1,14 +1,15 @@
-function Submit({user,go}) {
-  const [form,setForm] = useState({
-    title:'',
-    description:'',
-    category:'1',
-    priority:'MEDIUM',
-    location:''
+function Submit({ user, go }) {
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    category: '1',
+    priority: 'MEDIUM',
+    location: ''
   });
 
-  const [msg,setMsg] = useState('');
-  const [loading,setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const categories = [
     { id: 1, name: 'Roads' },
@@ -31,13 +32,15 @@ function Submit({user,go}) {
 
     setLoading(true);
     setMsg('');
+    setSuccess(false);
 
     try {
       const response = await fetch(API + '/complaints', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          'Authorization':
+            'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify({
           title: form.title,
@@ -80,123 +83,205 @@ function Submit({user,go}) {
         );
       }
 
+      setSuccess(true);
+
       setMsg(
         'Complaint submitted successfully! Tracking number: ' +
         data.trackingNumber
       );
 
       setForm({
-        title:'',
-        description:'',
-        category:'1',
-        priority:'MEDIUM',
-        location:''
+        title: '',
+        description: '',
+        category: '1',
+        priority: 'MEDIUM',
+        location: ''
       });
 
     } catch (error) {
       console.error('Complaint submission error:', error);
-      setMsg(error.message || 'Unable to submit complaint.');
+
+      setSuccess(false);
+      setMsg(
+        error.message ||
+        'Unable to submit complaint.'
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="max-w-3xl mx-auto px-5 pt-14">
-      <h2 className="text-5xl font-black">
-        Report a public issue
-      </h2>
+    <section className="max-w-3xl mx-auto px-5 pt-14 pb-20">
 
-      <p className="text-slate-400 mt-2">
-        Provide enough detail for an authority to act quickly.
-      </p>
+      <div className="mb-8">
+        <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest">
+          CivicResolve
+        </p>
+
+        <h2 className="text-4xl md:text-5xl font-black mt-2">
+          Report a public issue
+        </h2>
+
+        <p className="text-slate-400 mt-3 text-lg">
+          Provide enough detail for an authority to act quickly.
+        </p>
+      </div>
 
       <form
         onSubmit={send}
-        className="glass rounded-3xl p-7 mt-7 space-y-5"
+        className="glass rounded-3xl p-6 md:p-8 space-y-5"
       >
 
-        <input
-          className="input"
-          placeholder="Complaint title"
-          required
-          value={form.title}
-          onChange={e =>
-            setForm({...form,title:e.target.value})
-          }
-        />
+        <div>
+          <label className="block text-sm font-semibold text-slate-300 mb-2">
+            Complaint title
+          </label>
 
-        <textarea
-          className="input min-h-40"
-          placeholder="Describe the issue, what happened and where..."
-          required
-          value={form.description}
-          onChange={e =>
-            setForm({...form,description:e.target.value})
-          }
-        />
+          <input
+            className="input"
+            placeholder="Example: Large pothole near main road"
+            required
+            value={form.title}
+            onChange={e =>
+              setForm({
+                ...form,
+                title: e.target.value
+              })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-300 mb-2">
+            Description
+          </label>
+
+          <textarea
+            className="input min-h-40 resize-y"
+            placeholder="Describe the issue, what happened and where..."
+            required
+            value={form.description}
+            onChange={e =>
+              setForm({
+                ...form,
+                description: e.target.value
+              })
+            }
+          />
+        </div>
 
         <div className="grid md:grid-cols-2 gap-4">
 
-          <select
-            className="input"
-            value={form.category}
-            onChange={e =>
-              setForm({...form,category:e.target.value})
-            }
-          >
-            {categories.map(category => (
-              <option
-                key={category.id}
-                value={category.id}
-                className="bg-slate-900"
-              >
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">
+              Category
+            </label>
 
-          <select
-            className="input"
-            value={form.priority}
-            onChange={e =>
-              setForm({...form,priority:e.target.value})
-            }
-          >
-            {['LOW','MEDIUM','HIGH','URGENT'].map(priority => (
-              <option
-                key={priority}
-                value={priority}
-                className="bg-slate-900"
-              >
-                {priority}
-              </option>
-            ))}
-          </select>
+            <select
+              className="input"
+              value={form.category}
+              onChange={e =>
+                setForm({
+                  ...form,
+                  category: e.target.value
+                })
+              }
+            >
+              {categories.map(category => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">
+              Priority
+            </label>
+
+            <select
+              className="input"
+              value={form.priority}
+              onChange={e =>
+                setForm({
+                  ...form,
+                  priority: e.target.value
+                })
+              }
+            >
+              {['LOW', 'MEDIUM', 'HIGH', 'URGENT'].map(priority => (
+                <option
+                  key={priority}
+                  value={priority}
+                >
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </div>
 
         </div>
 
-        <input
-          className="input"
-          placeholder="Location / landmark"
-          value={form.location}
-          onChange={e =>
-            setForm({...form,location:e.target.value})
-          }
-        />
+        <div>
+          <label className="block text-sm font-semibold text-slate-300 mb-2">
+            Location
+          </label>
+
+          <input
+            className="input"
+            placeholder="Location / landmark"
+            value={form.location}
+            onChange={e =>
+              setForm({
+                ...form,
+                location: e.target.value
+              })
+            }
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-cyan-300 text-slate-950 px-5 py-3 font-bold hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="
+            w-full
+            rounded-xl
+            bg-gradient-to-r
+            from-blue-500
+            to-violet-500
+            text-white
+            px-5
+            py-3.5
+            font-bold
+            shadow-lg
+            shadow-blue-500/20
+            hover:scale-[1.01]
+            hover:shadow-blue-500/30
+            transition
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            disabled:hover:scale-100
+          "
         >
           {loading ? 'Submitting...' : 'Submit grievance'}
         </button>
 
         {msg && (
-          <p className="text-cyan-200">
+          <div
+            className={`rounded-xl px-4 py-3 text-sm font-medium ${
+              success
+                ? 'bg-emerald-500/10 border border-emerald-400/20 text-emerald-300'
+                : 'bg-red-500/10 border border-red-400/20 text-red-300'
+            }`}
+          >
             {msg}
-          </p>
+          </div>
         )}
 
       </form>
