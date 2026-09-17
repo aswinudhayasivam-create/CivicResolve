@@ -1,11 +1,258 @@
 @import "tailwindcss";
 
-*{box-sizing:border-box}
-html{background:#000}
-body{margin:0;background:#020202;color:#f5f5f5;font-family:Inter,ui-sans-serif,system-ui,sans-serif;min-height:100vh}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 15% 10%,rgba(255,255,255,.055),transparent 28%),radial-gradient(circle at 85% 15%,rgba(255,255,255,.035),transparent 30%);z-index:-1}
-.glass{background:rgba(10,10,10,.82);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(22px);box-shadow:0 24px 80px rgba(0,0,0,.55)}
-.input{width:100%;background:#0b0b0b;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;outline:none;color:#fff}.input::placeholder{color:#737373}.input:focus{border-color:rgba(255,255,255,.42);box-shadow:0 0 0 3px rgba(255,255,255,.04)}
-button{cursor:pointer}
-select option{background:#0a0a0a;color:#fff}
-::selection{background:#fff;color:#000}
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #020617;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #f8fafc;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(37, 99, 235, 0.20),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(124, 58, 237, 0.18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(6, 182, 212, 0.10),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #020617 0%,
+      #070b1a 45%,
+      #0b0620 100%
+    );
+}
+
+/* Smooth page feel */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px
+    );
+
+  background-size: 45px 45px;
+  mask-image: linear-gradient(
+    to bottom,
+    black,
+    transparent 85%
+  );
+
+  z-index: -1;
+}
+
+/* Glass cards */
+
+.glass {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.82),
+      rgba(15, 23, 42, 0.62)
+    );
+
+  border: 1px solid rgba(148, 163, 184, 0.14);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.glass:hover {
+  border-color: rgba(96, 165, 250, 0.22);
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(59, 130, 246, 0.06);
+}
+
+/* Inputs */
+
+.input {
+  width: 100%;
+
+  padding: 13px 15px;
+
+  color: #f8fafc;
+
+  background:
+    rgba(2, 6, 23, 0.72);
+
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  border-radius: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.input::placeholder {
+  color: #64748b;
+}
+
+.input:hover {
+  border-color: rgba(148, 163, 184, 0.30);
+}
+
+.input:focus {
+  background: rgba(2, 6, 23, 0.9);
+
+  border-color: rgba(96, 165, 250, 0.75);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.10),
+    0 0 30px rgba(59, 130, 246, 0.08);
+}
+
+/* Select dropdown */
+
+select {
+  appearance: auto;
+}
+
+select option {
+  background: #020617;
+  color: #f8fafc;
+}
+
+/* Buttons */
+
+button {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Links */
+
+a {
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Text selection */
+
+::selection {
+  background: rgba(99, 102, 241, 0.75);
+  color: white;
+}
+
+/* Subtle glowing text */
+
+.glow-text {
+  text-shadow:
+    0 0 20px rgba(96, 165, 250, 0.25);
+}
+
+/* Gradient utility */
+
+.gradient-text {
+  background:
+    linear-gradient(
+      90deg,
+      #60a5fa,
+      #818cf8,
+      #c084fc
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Responsive improvements */
+
+@media (max-width: 640px) {
+  .glass {
+    border-radius: 20px;
+  }
+
+  .input {
+    padding: 12px 13px;
+  }
+}
+
+/* Reduced motion accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
