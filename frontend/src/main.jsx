@@ -41,50 +41,6 @@ const API = (
    DEMO DATA
 ========================================================= */
 
-const demoComplaints = [
-  {
-    id: 1,
-    trackingNumber: 'GRV-2026-1042',
-    title: 'Broken street lights on Main Road',
-    category: { name: 'Street Lights' },
-    priority: 'HIGH',
-    status: 'IN_PROGRESS',
-    location: 'Main Road',
-    createdAt: '2026-09-14'
-  },
-  {
-    id: 2,
-    trackingNumber: 'GRV-2026-1041',
-    title: 'Garbage collection delayed',
-    category: { name: 'Garbage' },
-    priority: 'MEDIUM',
-    status: 'UNDER_REVIEW',
-    location: 'Ward 12',
-    createdAt: '2026-09-13'
-  },
-  {
-    id: 3,
-    trackingNumber: 'GRV-2026-1037',
-    title: 'Potholes near bus stop',
-    category: { name: 'Roads' },
-    priority: 'HIGH',
-    status: 'RESOLVED',
-    location: 'Central Avenue',
-    createdAt: '2026-09-10'
-  },
-  {
-    id: 4,
-    trackingNumber: 'GRV-2026-1030',
-    title: 'Water supply interruption',
-    category: { name: 'Water Supply' },
-    priority: 'URGENT',
-    status: 'SUBMITTED',
-    location: 'Lake View',
-    createdAt: '2026-09-08'
-  }
-];
-
-
 /* =========================================================
    BUTTON
 ========================================================= */
@@ -1110,7 +1066,11 @@ function Admin() {
     submitted: 0,
     underReview: 0,
     inProgress: 0,
-    resolved: 0
+    resolved: 0,
+    low: 0,
+    medium: 0,
+    high: 0,
+    urgent: 0
   });
 
   const [selected, setSelected] = useState(null);
@@ -1436,22 +1396,10 @@ function Admin() {
 
                 <Pie
                   data={[
-                    {
-                      name: 'Urgent',
-                      value: 12
-                    },
-                    {
-                      name: 'High',
-                      value: 28
-                    },
-                    {
-                      name: 'Medium',
-                      value: 42
-                    },
-                    {
-                      name: 'Low',
-                      value: 18
-                    }
+                    { name: 'Urgent', value: stats.urgent },
+                    { name: 'High', value: stats.high },
+                    { name: 'Medium', value: stats.medium },
+                    { name: 'Low', value: stats.low }
                   ]}
                   dataKey="value"
                   nameKey="name"
