@@ -1,5 +1,7 @@
 node_modules/
 target/
+.m2-repository/
+frontend/dist/
 .env
 *.dll
 *.so

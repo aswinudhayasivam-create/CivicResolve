@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Value("${app.cors.origin:http://localhost:5173}") private String corsOrigin;
     @Bean PasswordEncoder encoder(){return new BCryptPasswordEncoder();}
     @Bean SecurityFilterChain filter(HttpSecurity h,JwtFilter jf)throws Exception{
-        return h.csrf(c->c.disable()).cors(c->c.configurationSource(r->{var x=new CorsConfiguration();x.setAllowedOrigins(Arrays.stream(corsOrigin.split(",")).map(String::trim).filter(s->!s.isEmpty()).toList());x.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));x.setAllowedHeaders(List.of("*"));x.setAllowCredentials(false);return x;}))
+        return h.csrf(c->c.disable()).cors(c->c.configurationSource(r->{var x=new CorsConfiguration();x.setAllowedOrigins(Arrays.stream(corsOrigin.split(",")).map(String::trim).filter(s->!s.isEmpty()).toList());x.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));x.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin"));x.setAllowCredentials(false);return x;}))
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(e->e.authenticationEntryPoint((q,res,x)->res.sendError(401,"Authentication required")).accessDeniedHandler((q,res,x)->res.sendError(403,"Access denied")))
             .authorizeHttpRequests(a->a.requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
