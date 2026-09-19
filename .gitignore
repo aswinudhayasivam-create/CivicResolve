@@ -6,4 +6,3 @@ target/
 *.dylib
 storage/uploads/*
 storage/logs/*
-backend/.m2/

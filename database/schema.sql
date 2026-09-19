@@ -12,10 +12,10 @@ CREATE TABLE IF NOT EXISTS categories(
 CREATE TABLE IF NOT EXISTS complaints(
  id BIGSERIAL PRIMARY KEY, tracking_number VARCHAR(50) UNIQUE NOT NULL,
  citizen_id BIGINT NOT NULL REFERENCES users(id), category_id BIGINT NOT NULL REFERENCES categories(id),
- title VARCHAR(250) NOT NULL, description TEXT NOT NULL,
+ title VARCHAR(160) NOT NULL, description TEXT NOT NULL,
  priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
  status VARCHAR(30) NOT NULL DEFAULT 'SUBMITTED',
- location VARCHAR(500), duplicate_score NUMERIC(6,5), duplicate_of BIGINT REFERENCES complaints(id),
+ location VARCHAR(250), duplicate_score NUMERIC(6,5), duplicate_of BIGINT REFERENCES complaints(id),
  assigned_to BIGINT REFERENCES users(id),
  created_at TIMESTAMP NOT NULL DEFAULT now(), updated_at TIMESTAMP NOT NULL DEFAULT now(),
  resolved_at TIMESTAMP
@@ -36,9 +36,6 @@ CREATE INDEX IF NOT EXISTS idx_status ON complaints(status);
 CREATE INDEX IF NOT EXISTS idx_category ON complaints(category_id);
 CREATE INDEX IF NOT EXISTS idx_created ON complaints(created_at);
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(5) NOT NULL DEFAULT 'en';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
-
 INSERT INTO categories(name,description) VALUES
 ('Roads','Potholes, damaged roads and signage'),
 ('Street Lights','Broken public lighting'),
@@ -50,3 +47,5 @@ INSERT INTO categories(name,description) VALUES
 ('Transportation','Public transport issues'),
 ('Other','Other grievances')
 ON CONFLICT(name) DO NOTHING;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(10) NOT NULL DEFAULT 'en';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
