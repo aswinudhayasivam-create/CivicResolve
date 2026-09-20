@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS complaints(
  title VARCHAR(160) NOT NULL, description TEXT NOT NULL,
  priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
  status VARCHAR(30) NOT NULL DEFAULT 'SUBMITTED',
- location VARCHAR(250), duplicate_score NUMERIC(6,5), duplicate_of BIGINT REFERENCES complaints(id),
+ location VARCHAR(250), latitude DOUBLE PRECISION, longitude DOUBLE PRECISION,
+ duplicate_score NUMERIC(6,5), duplicate_of BIGINT REFERENCES complaints(id),
  assigned_to BIGINT REFERENCES users(id),
  created_at TIMESTAMP NOT NULL DEFAULT now(), updated_at TIMESTAMP NOT NULL DEFAULT now(),
  resolved_at TIMESTAMP
@@ -45,7 +46,22 @@ INSERT INTO categories(name,description) VALUES
 ('Electricity','Public electrical infrastructure'),
 ('Public Safety','Civic safety issues'),
 ('Transportation','Public transport issues'),
+('Education','Public education facilities and services'),
+('Social / Community','Community facilities and social services'),
+('Footpaths / Sidewalks','Damaged or inaccessible footpaths and sidewalks'),
+('Traffic Signals','Traffic lights and road signal issues'),
+('Public Transport','Bus stops, shelters and public transit issues'),
+('Parking','Public parking and parking enforcement issues'),
+('Public Toilets','Public restroom maintenance and access'),
+('Pollution','Air, water or land pollution'),
+('Trees / Green Spaces','Parks, trees and green-space maintenance'),
+('Noise Pollution','Excessive public noise concerns'),
+('Accessibility','Accessibility barriers in public spaces'),
+('Waste Management','Waste processing and disposal concerns'),
+('Damaged Infrastructure','Damaged public assets and infrastructure'),
 ('Other','Other grievances')
 ON CONFLICT(name) DO NOTHING;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(10) NOT NULL DEFAULT 'en';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;

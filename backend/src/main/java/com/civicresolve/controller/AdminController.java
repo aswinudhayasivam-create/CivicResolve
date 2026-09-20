@@ -18,7 +18,7 @@ public class AdminController {
     public AdminController(ComplaintRepository r, ComplaintHistoryRepository h, UserRepository u){repo=r;history=h;users=u;}
     private User authority(Authentication a){ return users.findByEmail(a.getName()).orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Authority account not found")); }
     private Map<String,Object> safe(Complaint c){
-        Map<String,Object> m=new LinkedHashMap<>(); m.put("id",c.id);m.put("trackingNumber",c.trackingNumber);m.put("title",c.title);m.put("description",c.description);m.put("priority",c.priority);m.put("status",c.status);m.put("location",c.location==null?"":c.location);m.put("createdAt",c.createdAt);m.put("updatedAt",c.updatedAt);m.put("resolvedAt",c.resolvedAt);m.put("duplicateScore",c.duplicateScore);m.put("duplicateOf",c.duplicateOf);
+        Map<String,Object> m=new LinkedHashMap<>(); m.put("id",c.id);m.put("trackingNumber",c.trackingNumber);m.put("title",c.title);m.put("description",c.description);m.put("priority",c.priority);m.put("status",c.status);m.put("location",c.location==null?"":c.location);m.put("latitude",c.latitude);m.put("longitude",c.longitude);m.put("createdAt",c.createdAt);m.put("updatedAt",c.updatedAt);m.put("resolvedAt",c.resolvedAt);m.put("duplicateScore",c.duplicateScore);m.put("duplicateOf",c.duplicateOf);
         Map<String,Object> cat=new LinkedHashMap<>();cat.put("id",c.category==null?null:c.category.id);cat.put("name",c.category==null?"Unknown":c.category.name);m.put("category",cat);
         if(c.citizen!=null)m.put("citizen",Map.of("fullName",c.citizen.fullName,"email",c.citizen.email,"phone",c.citizen.phone==null?"":c.citizen.phone));
         if(c.assignedTo!=null)m.put("assignedTo",Map.of("fullName",c.assignedTo.fullName,"email",c.assignedTo.email));
@@ -43,7 +43,9 @@ public class AdminController {
         Complaint c = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found"));
         c.assignedTo = actor;
         c.updatedAt = LocalDateTime.now();
-        return safe(repo.save(c));
+        Complaint saved = repo.save(c);
+        var h = new ComplaintHistory(); h.complaint = saved; h.changedBy = actor; h.oldStatus = saved.status; h.newStatus = "ASSIGNED"; h.comment = "Complaint assigned to an authority"; history.save(h);
+        return safe(saved);
     }
 
     @GetMapping("/analytics") public Map<String,Object> analytics(Authentication a){ authority(a);return Map.of("total",repo.count(),"submitted",repo.countByStatus("SUBMITTED"),"underReview",repo.countByStatus("UNDER_REVIEW"),"inProgress",repo.countByStatus("IN_PROGRESS"),"resolved",repo.countByStatus("RESOLVED"),"highPriority",repo.countByPriority("HIGH"),"urgent",repo.countByPriority("URGENT"));}
