@@ -14,4 +14,8 @@ public class User {
     @Column(name = "is_active", nullable = false) public boolean active = true;
     @Column(length = 10, nullable = false) public String language = "en";
     @Column(name = "notifications_enabled", nullable = false) public boolean notificationsEnabled = true;
+    @Column(name = "authority_id", length = 40) public String authorityId;
+    @Column(length = 120) public String department;
+    @Column(length = 120) public String designation;
+    @Column(name = "assigned_area", length = 120) public String assignedArea;
 }

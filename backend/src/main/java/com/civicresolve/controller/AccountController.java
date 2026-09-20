@@ -28,15 +28,11 @@ public class AccountController {
     }
 
     private Map<String, Object> response(User u) {
-        return Map.of(
-            "userId", u.id,
-            "fullName", u.fullName,
-            "email", u.email,
-            "role", u.role,
-            "phone", u.phone == null ? "" : u.phone,
-            "language", u.language == null ? "en" : u.language,
-            "notificationsEnabled", u.notificationsEnabled
-        );
+        Map<String,Object> value = new java.util.LinkedHashMap<>();
+        value.put("userId",u.id); value.put("fullName",u.fullName); value.put("email",u.email); value.put("role",u.role);
+        value.put("phone",u.phone == null ? "" : u.phone); value.put("language",u.language == null ? "en" : u.language); value.put("notificationsEnabled",u.notificationsEnabled);
+        value.put("authorityId",u.authorityId == null ? "" : u.authorityId); value.put("department",u.department == null ? "" : u.department); value.put("designation",u.designation == null ? "" : u.designation); value.put("assignedArea",u.assignedArea == null ? "" : u.assignedArea); value.put("active",u.active);
+        return value;
     }
 
     @GetMapping("/profile")

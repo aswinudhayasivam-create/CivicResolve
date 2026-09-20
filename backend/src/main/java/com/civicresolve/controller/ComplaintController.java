@@ -23,9 +23,10 @@ public class ComplaintController {
     private final UserRepository users;
     private final CategoryRepository categories;
     private final DuplicateDetector duplicates;
+    private final NotificationRepository notifications;
 
-    public ComplaintController(ComplaintRepository repo, ComplaintHistoryRepository history, UserRepository users, CategoryRepository categories, DuplicateDetector duplicates) {
-        this.repo = repo; this.history = history; this.users = users; this.categories = categories; this.duplicates = duplicates;
+    public ComplaintController(ComplaintRepository repo, ComplaintHistoryRepository history, UserRepository users, CategoryRepository categories, DuplicateDetector duplicates, NotificationRepository notifications) {
+        this.repo = repo; this.history = history; this.users = users; this.categories = categories; this.duplicates = duplicates; this.notifications=notifications;
     }
 
     private User citizen(Authentication a) {
@@ -102,6 +103,7 @@ public class ComplaintController {
             .ifPresent(match -> { c.duplicateScore = match.getValue(); c.duplicateOf = match.getKey().id; });
         var saved = repo.save(c);
         var h = new ComplaintHistory(); h.complaint = saved; h.newStatus = "SUBMITTED"; h.comment = "Complaint submitted"; history.save(h);
+        if(saved.citizen.notificationsEnabled){var n=new AppNotification();n.user=saved.citizen;n.complaint=saved;n.message="Complaint "+saved.trackingNumber+" was submitted successfully.";notifications.save(n);}
         return safe(saved);
     }
 

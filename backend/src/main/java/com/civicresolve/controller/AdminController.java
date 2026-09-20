@@ -14,8 +14,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-    private final ComplaintRepository repo; private final ComplaintHistoryRepository history; private final UserRepository users;
-    public AdminController(ComplaintRepository r, ComplaintHistoryRepository h, UserRepository u){repo=r;history=h;users=u;}
+    private final ComplaintRepository repo; private final ComplaintHistoryRepository history; private final UserRepository users; private final NotificationRepository notifications;
+    public AdminController(ComplaintRepository r, ComplaintHistoryRepository h, UserRepository u, NotificationRepository n){repo=r;history=h;users=u;notifications=n;}
     private User authority(Authentication a){ return users.findByEmail(a.getName()).orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Authority account not found")); }
     private Map<String,Object> safe(Complaint c){
         Map<String,Object> m=new LinkedHashMap<>(); m.put("id",c.id);m.put("trackingNumber",c.trackingNumber);m.put("title",c.title);m.put("description",c.description);m.put("priority",c.priority);m.put("status",c.status);m.put("location",c.location==null?"":c.location);m.put("latitude",c.latitude);m.put("longitude",c.longitude);m.put("createdAt",c.createdAt);m.put("updatedAt",c.updatedAt);m.put("resolvedAt",c.resolvedAt);m.put("duplicateScore",c.duplicateScore);m.put("duplicateOf",c.duplicateOf);
@@ -35,18 +35,20 @@ public class AdminController {
         if(!List.of("SUBMITTED","UNDER_REVIEW","IN_PROGRESS","RESOLVED").contains(next))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid complaint status");
         String old=c.status;c.status=next;c.updatedAt=LocalDateTime.now();c.resolvedAt="RESOLVED".equals(next)?c.updatedAt:null;var saved=repo.save(c);
         var h=new ComplaintHistory();h.complaint=saved;h.changedBy=actor;h.oldStatus=old;h.newStatus=saved.status;h.comment=Objects.toString(b.get("comment"),"Status updated by authority").trim();
-        if(h.comment.length()>1000) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Comment must be 1000 characters or fewer");if(h.comment.isBlank())h.comment="Status updated by authority";history.save(h);return safe(saved);
+        if(h.comment.length()>1000) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Comment must be 1000 characters or fewer");if(h.comment.isBlank())h.comment="Status updated by authority";history.save(h);notifyCitizen(saved,"Complaint "+saved.trackingNumber+" is now "+next.replace('_',' ').toLowerCase(Locale.ROOT)+".");return safe(saved);
     }
     @PatchMapping("/complaints/{id}/assign-self")
     public Map<String,Object> assignSelf(@PathVariable Long id, Authentication a) {
         User actor = authority(a);
         Complaint c = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found"));
         c.assignedTo = actor;
-        c.updatedAt = LocalDateTime.now();
+        c.updatedAt = LocalDateTime.now(); c.assignedAt=c.updatedAt;
         Complaint saved = repo.save(c);
         var h = new ComplaintHistory(); h.complaint = saved; h.changedBy = actor; h.oldStatus = saved.status; h.newStatus = "ASSIGNED"; h.comment = "Complaint assigned to an authority"; history.save(h);
-        return safe(saved);
+        notifyCitizen(saved,"An authority has been assigned to complaint "+saved.trackingNumber+"."); return safe(saved);
     }
+
+    private void notifyCitizen(Complaint c,String message){if(c.citizen!=null&&c.citizen.notificationsEnabled){var n=new AppNotification();n.user=c.citizen;n.complaint=c;n.message=message;notifications.save(n);}}
 
     @GetMapping("/analytics") public Map<String,Object> analytics(Authentication a){ authority(a);return Map.of("total",repo.count(),"submitted",repo.countByStatus("SUBMITTED"),"underReview",repo.countByStatus("UNDER_REVIEW"),"inProgress",repo.countByStatus("IN_PROGRESS"),"resolved",repo.countByStatus("RESOLVED"),"highPriority",repo.countByPriority("HIGH"),"urgent",repo.countByPriority("URGENT"));}
 }

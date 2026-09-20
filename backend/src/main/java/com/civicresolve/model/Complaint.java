@@ -10,5 +10,5 @@ import jakarta.persistence.*; import java.time.LocalDateTime;
  public Double latitude; public Double longitude;
  public Double duplicateScore; public Long duplicateOf;
  @ManyToOne public User assignedTo;
- public LocalDateTime createdAt=LocalDateTime.now(),updatedAt=LocalDateTime.now(),resolvedAt;
+ public LocalDateTime createdAt=LocalDateTime.now(),updatedAt=LocalDateTime.now(),resolvedAt,assignedAt;
 }

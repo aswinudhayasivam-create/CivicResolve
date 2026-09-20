@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/account/**").hasAnyRole("CITIZEN","ADMIN","AUTHORITY")
                 .requestMatchers(HttpMethod.GET,"/api/complaints/mine").hasRole("CITIZEN")
                 .requestMatchers(HttpMethod.POST,"/api/complaints").hasRole("CITIZEN")
+                .requestMatchers("/api/management/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN","AUTHORITY")
                 .anyRequest().authenticated())
             .addFilterBefore(jf,UsernamePasswordAuthenticationFilter.class).build();

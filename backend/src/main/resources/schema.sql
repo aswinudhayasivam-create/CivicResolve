@@ -21,6 +21,17 @@ CREATE TABLE IF NOT EXISTS complaints(
  created_at TIMESTAMP NOT NULL DEFAULT now(), updated_at TIMESTAMP NOT NULL DEFAULT now(),
  resolved_at TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS notifications(
+ id BIGSERIAL PRIMARY KEY, user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ complaint_id BIGINT REFERENCES complaints(id) ON DELETE SET NULL,
+ message VARCHAR(500) NOT NULL, is_read BOOLEAN NOT NULL DEFAULT FALSE,
+ created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS complaint_feedback(
+ id BIGSERIAL PRIMARY KEY, complaint_id BIGINT UNIQUE NOT NULL REFERENCES complaints(id) ON DELETE CASCADE,
+ citizen_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5), comment VARCHAR(1000), created_at TIMESTAMP NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS complaint_history(
  id BIGSERIAL PRIMARY KEY, complaint_id BIGINT NOT NULL REFERENCES complaints(id) ON DELETE CASCADE,
  changed_by BIGINT REFERENCES users(id), old_status VARCHAR(30),
@@ -36,6 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_citizen ON complaints(citizen_id);
 CREATE INDEX IF NOT EXISTS idx_status ON complaints(status);
 CREATE INDEX IF NOT EXISTS idx_category ON complaints(category_id);
 CREATE INDEX IF NOT EXISTS idx_created ON complaints(created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read, created_at);
 
 INSERT INTO categories(name,description) VALUES
 ('Roads','Potholes, damaged roads and signage'),
@@ -59,9 +71,18 @@ INSERT INTO categories(name,description) VALUES
 ('Accessibility','Accessibility barriers in public spaces'),
 ('Waste Management','Waste processing and disposal concerns'),
 ('Damaged Infrastructure','Damaged public assets and infrastructure'),
+('Bridges','Bridge damage, maintenance and safety issues'),
+('Bus Stops','Bus-stop shelter, access and maintenance issues'),
+('Traffic','Traffic flow and road-use concerns'),
 ('Other','Other grievances')
 ON CONFLICT(name) DO NOTHING;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(10) NOT NULL DEFAULT 'en';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE complaints ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
 ALTER TABLE complaints ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS authority_id VARCHAR(40);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS department VARCHAR(120);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS designation VARCHAR(120);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_area VARCHAR(120);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_authority_id ON users(authority_id) WHERE authority_id IS NOT NULL;
